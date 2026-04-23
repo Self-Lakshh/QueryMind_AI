@@ -70,7 +70,7 @@ export const AppPage: React.FC<AppPageProps> = ({ onBack, isDark, toggleTheme })
       if (res.error) {
         setError(res.error);
       } else {
-        setQueryResults(res);
+        setQueryResults({ ...res, total: res.count });
       }
     } catch (err) {
       setError("Database execution error.");
@@ -128,10 +128,10 @@ export const AppPage: React.FC<AppPageProps> = ({ onBack, isDark, toggleTheme })
           
           {/* Left Panel: Inputs */}
           <div className="flex flex-col gap-6">
-            <SchemaUpload onSchemaSet={setSchema} />
+            <SchemaUpload onLoaded={setSchema} />
             <QueryInput 
-              onGenerate={handleGenerate} 
-              disabled={isGenerating || !schema} 
+              onSubmit={handleGenerate} 
+              loading={isGenerating} 
             />
             
             <AnimatePresence>
