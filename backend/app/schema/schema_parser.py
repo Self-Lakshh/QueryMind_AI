@@ -60,14 +60,32 @@ def detect_primary_keys(schema):
     return pks
 
 def detect_foreign_keys(schema):
-    """Mock detection (checks for table_id patterns)."""
+    """Detects foreign keys from explicit SQL statements or naming conventions."""
     fks = []
     tables = extract_tables(schema)
+    raw_sql = schema.get("raw_sql", "").upper()
+    
+    # 1. Parse explicit FOREIGN KEY clauses
+    # Pattern: FOREIGN KEY (col) REFERENCES table(ref_col)
+    fk_matches = re.findall(r'FOREIGN\s+KEY\s*\((.*?)\)\s*REFERENCES\s+([a-zA-Z_0-9]+)\s*\((.*?)\)', raw_sql, re.IGNORECASE)
+    for col, ref_table, ref_col in fk_matches:
+        # We need to find which table this FK belongs to. 
+        # This is simplified; in a real parser we'd know the context.
+        # Here we just look at the raw SQL blocks.
+        fks.append(f"{col.strip()} \u2192 {ref_table.strip()}.{ref_col.strip()}")
+
+    # 2. Heuristic: check for table_id patterns
     for table, cols in schema.get("tables", {}).items():
         for col in cols:
             for other_table in tables:
-                if other_table != table and col.lower() == f"{other_table.lower()}_id":
-                    fks.append(f"{table}.{col} \u2192 {other_table}.id")
+                if other_table != table:
+                    # check for user_id -> users.id or users_id -> users.id
+                    singular = other_table.lower().rstrip('s')
+                    patterns = [f"{other_table.lower()}_id", f"{singular}_id"]
+                    if col.lower() in patterns:
+                        fk_str = f"{table}.{col} \u2192 {other_table}.id"
+                        if fk_str not in fks:
+                            fks.append(fk_str)
     return fks
 
 def build_schema_dictionary(schema):
