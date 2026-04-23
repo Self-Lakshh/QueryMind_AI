@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, 
@@ -40,8 +40,22 @@ export const AppPage: React.FC<AppPageProps> = ({ onBack, isDark, toggleTheme })
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [lastQuestion, setLastQuestion] = useState('');
 
+  // Error Auto-Fade
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(''), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
+  const humanizeError = (err: string) => {
+    if (err.includes("ECONNREFUSED")) return "AI service is offline. Please start the inference server.";
+    if (err.includes("SELECT queries are allowed")) return "Security Block: Only SELECT operations are permitted.";
+    return err;
+  };
+
   // Handlers
-  const handleGenerate = async (question: string) => {
+  const handleGenerate = useCallback(async (question: string) => {
     if (!schema) {
       setError("Please set a database schema first.");
       return;
@@ -60,7 +74,6 @@ export const AppPage: React.FC<AppPageProps> = ({ onBack, isDark, toggleTheme })
         setGeneratedSQL(res.sql);
         setLastQuestion(question);
         
-        // Fetch cost and save to history
         try {
           const { cost } = await api.getQueryCost(res.sql, schema.name);
           const newItem: HistoryItem = {
@@ -86,10 +99,10 @@ export const AppPage: React.FC<AppPageProps> = ({ onBack, isDark, toggleTheme })
     } finally {
       setIsGenerating(false);
     }
-  };
+  }, [schema]);
 
-  const handleExecute = async () => {
-    if (!generatedSQL) return;
+  const handleExecute = useCallback(async () => {
+    if (!generatedSQL || !schema) return;
     
     setIsExecuting(true);
     setError('');
@@ -106,45 +119,45 @@ export const AppPage: React.FC<AppPageProps> = ({ onBack, isDark, toggleTheme })
     } finally {
       setIsExecuting(false);
     }
-  };
+  }, [generatedSQL, schema]);
 
-  const handleExplain = async () => {
-    if (!generatedSQL) return;
+  const handleExplain = useCallback(async () => {
+    if (!generatedSQL || !schema) return;
     try {
       const res = await api.explainSQL(generatedSQL, schema.name);
       setSqlExplanation(res.explanation);
     } catch (err) {
       setError("Explanation failed.");
     }
-  };
+  }, [generatedSQL, schema]);
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setGeneratedSQL('');
     setSqlExplanation('');
     setQueryResults(null);
     setError('');
     setLastQuestion('');
-  };
+  }, []);
 
-  const handleHistorySelect = (item: HistoryItem) => {
+  const handleHistorySelect = useCallback((item: HistoryItem) => {
     setGeneratedSQL(item.sql);
     setLastQuestion(item.question);
     setQueryResults(null);
     setSqlExplanation('');
-  };
+  }, []);
 
-  const handleHistoryDelete = (id: string) => {
+  const handleHistoryDelete = useCallback((id: string) => {
     setHistory(prev => {
       const updated = prev.filter(i => i.id !== id);
       localStorage.setItem('querymind_history', JSON.stringify(updated));
       return updated;
     });
-  };
+  }, []);
 
-  const handleHistoryClear = () => {
+  const handleHistoryClear = useCallback(() => {
     setHistory([]);
     localStorage.removeItem('querymind_history');
-  };
+  }, []);
 
   return (
     <div className="flex flex-col h-screen bg-surface-base">
@@ -163,7 +176,8 @@ export const AppPage: React.FC<AppPageProps> = ({ onBack, isDark, toggleTheme })
         </div>
 
         <div className="flex items-center gap-4">
-          <button 
+          <motion.button 
+            whileTap={{ scale: 0.95 }}
             onClick={() => setIsHistoryOpen(true)} 
             className="p-2 text-white/40 hover:text-white transition-colors relative"
             title="Query History"
@@ -172,13 +186,22 @@ export const AppPage: React.FC<AppPageProps> = ({ onBack, isDark, toggleTheme })
             {history.length > 0 && (
               <span className="absolute top-1 right-1 w-2 h-2 bg-gn-500 rounded-full border border-surface-100" />
             )}
-          </button>
-          <button onClick={handleReset} className="p-2 text-white/20 hover:text-white transition-colors" title="Clear all">
+          </motion.button>
+          <motion.button 
+            whileTap={{ scale: 0.95 }}
+            onClick={handleReset} 
+            className="p-2 text-white/20 hover:text-white transition-colors" 
+            title="Clear all"
+          >
             <RefreshCcw size={18} />
-          </button>
-          <button onClick={toggleTheme} className="p-2 text-white/40 hover:text-white transition-colors">
+          </motion.button>
+          <motion.button 
+            whileTap={{ scale: 0.95 }}
+            onClick={toggleTheme} 
+            className="p-2 text-white/40 hover:text-white transition-colors"
+          >
             {isDark ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
+          </motion.button>
         </div>
       </header>
 
@@ -197,12 +220,13 @@ export const AppPage: React.FC<AppPageProps> = ({ onBack, isDark, toggleTheme })
             <AnimatePresence>
               {error && (
                 <motion.div 
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-3"
+                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                  className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-3 shadow-[0_0_30px_rgba(239,68,68,0.1)]"
                 >
-                  <AlertCircle size={18} /> {error}
+                  <AlertCircle size={18} />
+                  <span className="font-medium">{humanizeError(error)}</span>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -211,29 +235,33 @@ export const AppPage: React.FC<AppPageProps> = ({ onBack, isDark, toggleTheme })
           {/* Right Panel: Results */}
           <div className="flex flex-col gap-6">
             {generatedSQL ? (
-              <>
+              <div className="flex flex-col gap-6">
                 <SQLPreview 
                   sql={generatedSQL} 
                   onExecute={handleExecute} 
                   onExplain={handleExplain}
                   loading={isExecuting}
                 />
-                <AnimatePresence>
-                  {sqlExplanation && <SQLExplanation explanation={sqlExplanation} />}
-                  {queryResults && <ResultsTable results={queryResults} />}
+                <AnimatePresence mode="wait">
+                  {sqlExplanation && <SQLExplanation explanation={sqlExplanation} key="explanation" />}
+                  {queryResults && <ResultsTable results={queryResults} key="results" />}
                 </AnimatePresence>
-              </>
-            ) : (
-              <div className="panel h-full min-h-[400px] flex flex-col items-center justify-center text-center">
-                <div className="w-20 h-20 rounded-full bg-gn-500/5 flex items-center justify-center mb-6 relative">
-                  <div className="absolute inset-0 bg-gn-500/10 rounded-full animate-ping opacity-20" />
-                  <Sparkles size={32} className="text-gn-500/40" />
-                </div>
-                <h3 className="text-white font-semibold text-lg mb-2">Awaiting your question</h3>
-                <p className="text-white/30 text-sm max-w-xs">
-                  Upload a schema and ask a natural language question to generate optimized SQL.
-                </p>
               </div>
+            ) : (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="panel h-full min-h-[500px] flex flex-col items-center justify-center text-center p-12 border-dashed border-white/5 bg-transparent"
+              >
+                <div className="w-24 h-24 rounded-3xl bg-gn-500/5 flex items-center justify-center mb-8 relative">
+                  <div className="absolute inset-0 bg-gn-500/10 rounded-3xl animate-ping opacity-10" />
+                  <Database size={40} className="text-gn-500/30" />
+                </div>
+                <h3 className="text-white/60 font-bold text-xl mb-3 tracking-tight">Upload a schema to start</h3>
+                <p className="text-white/20 text-sm max-w-[280px] leading-relaxed">
+                  Provide your database structure to enable AI-powered SQL generation and analysis.
+                </p>
+              </motion.div>
             )}
           </div>
 

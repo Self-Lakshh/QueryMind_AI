@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Send, Sparkles, Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Send, Sparkles, Loader2, Command } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface QueryInputProps {
@@ -22,64 +22,81 @@ export const QueryInput: React.FC<QueryInputProps> = ({ onSubmit, loading }) => 
   };
 
   return (
-    <div className="panel">
-      <div className="flex items-center justify-between mb-4">
-        <span className="label-tag">Ask Question</span>
-        <span className={cn("text-[10px] font-mono", question.length > 450 ? "text-red-400" : "text-white/20")}>
+    <div className="panel p-6 border-white/[0.05]">
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-gn-500/10 flex items-center justify-center">
+            <Command size={16} className="text-gn-400" />
+          </div>
+          <span className="text-[11px] font-bold text-white/40 uppercase tracking-[0.2em]">Prompt Engine</span>
+        </div>
+        <span className={cn(
+          "text-[10px] font-mono transition-colors", 
+          question.length > 450 ? "text-red-400" : "text-white/10"
+        )}>
           {question.length}/500
         </span>
       </div>
 
-      <div className="relative mb-6">
+      <div className="relative mb-6 group">
         <textarea 
           rows={4}
           value={question}
           onChange={(e) => setQuestion(e.target.value.slice(0, 500))}
-          placeholder="Ask anything about your data..."
-          className="input-dark p-6 pr-14 text-base resize-none"
+          placeholder="Ask anything about your data in plain English..."
+          className="input-dark p-6 pr-14 text-[15px] resize-none min-h-[140px] leading-relaxed group-hover:border-white/15 shadow-inner"
           disabled={loading}
+          onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSubmit()}
         />
-        <button 
+        <motion.button 
+          whileHover={question.trim() ? { scale: 1.1, rotate: -5 } : {}}
+          whileTap={{ scale: 0.9 }}
           onClick={() => handleSubmit()}
           disabled={loading || !question.trim()}
           className={cn(
-            "absolute bottom-4 right-4 p-3 rounded-xl transition-all",
-            question.trim() ? "bg-gn-500 text-black shadow-lg hover:scale-105 active:scale-95" : "bg-white/5 text-white/10"
+            "absolute bottom-4 right-4 p-3 rounded-xl transition-all shadow-xl",
+            question.trim() 
+              ? "bg-gn-500 text-black shadow-gn-500/20" 
+              : "bg-white/[0.03] text-white/10"
           )}
         >
-          {loading ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
-        </button>
+          {loading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+        </motion.button>
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-8">
+      <div className="flex flex-wrap gap-2.5 mb-8">
         {EXAMPLES.map((ex, i) => (
-          <button
+          <motion.button
             key={i}
+            whileHover={{ y: -1, scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setQuestion(ex)}
-            className="px-3 py-1.5 rounded-full bg-white/5 border border-white/5 text-[11px] text-white/40 hover:bg-white/10 hover:text-white transition-all"
+            className="px-4 py-1.5 rounded-xl bg-white/[0.02] border border-white/[0.04] text-[11px] font-bold text-white/30 uppercase tracking-wider hover:bg-white/[0.05] hover:text-white/70 transition-all shadow-sm"
           >
             {ex}
-          </button>
+          </motion.button>
         ))}
       </div>
 
-      <button 
+      <motion.button 
+        whileHover={{ y: -2, scale: 1.01 }}
+        whileTap={{ scale: 0.98 }}
         onClick={() => handleSubmit()}
         disabled={loading || !question.trim()}
-        className="glow-btn w-full py-4 flex items-center justify-center gap-3 text-base"
+        className="glow-btn w-full py-4.5 flex items-center justify-center gap-4 text-sm tracking-[0.1em] uppercase shadow-gn-500/10"
       >
         {loading ? (
           <>
             <Loader2 size={20} className="animate-spin" />
-            Generating SQL...
+            Synthesizing SQL...
           </>
         ) : (
           <>
-            <Sparkles size={20} />
-            Generate SQL
+            <Sparkles size={18} className="animate-glow-pulse" />
+            Generate Statement
           </>
         )}
-      </button>
+      </motion.button>
     </div>
   );
 };

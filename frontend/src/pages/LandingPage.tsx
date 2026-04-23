@@ -28,20 +28,20 @@ const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; desc: string
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ delay: index * 0.1, duration: 0.6 }}
-      whileHover={{ scale: 1.02, y: -4 }}
-      className="glass-card glass-hover group cursor-pointer relative overflow-hidden"
+      whileHover={{ y: -6, scale: 1.02 }}
+      className="panel p-8 group cursor-pointer border-white/[0.05] relative overflow-hidden"
     >
-      <div className="w-12 h-12 rounded-xl bg-gn-500/10 flex items-center justify-center mb-4 group-hover:bg-gn-500/20 transition-colors">
-        {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { className: "text-gn-400" }) : icon}
+      <div className="w-14 h-14 rounded-2xl bg-gn-500/10 flex items-center justify-center mb-6 group-hover:bg-gn-500/20 transition-all duration-300 shadow-inner">
+        {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { className: "text-gn-400 group-hover:scale-110 transition-transform duration-300", size: 28 }) : icon}
       </div>
-      <h3 className="text-xl font-semibold text-white mb-2">{title}</h3>
-      <p className="text-white/50 text-sm leading-relaxed mb-4">{desc}</p>
+      <h3 className="text-xl font-bold text-white mb-3 tracking-tight">{title}</h3>
+      <p className="text-white/40 text-[14px] leading-relaxed mb-4 max-w-[30ch] group-hover:text-white/60 transition-colors">{desc}</p>
       
-      <div className="absolute bottom-6 right-6">
+      <div className="absolute bottom-8 right-8">
         <motion.div
-          initial={{ x: -4, opacity: 0 }}
-          whileHover={{ x: 0, opacity: 1 }}
-          className="text-gn-400"
+          initial={{ x: -10, opacity: 0 }}
+          whileInView={{ x: 0, opacity: 1 }}
+          className="text-gn-500/30 group-hover:text-gn-400 transition-colors"
         >
           <ArrowRight size={20} />
         </motion.div>
@@ -54,65 +54,51 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, isDark, toggl
   const containerRef = useRef(null);
   const heroRef = useRef(null);
   
-  // Parallax Orbs
   const orb1Y = useParallax(heroRef, 100);
   const orb2Y = useParallax(heroRef, 200);
   const orb3Y = useParallax(heroRef, 300);
 
-
   return (
-    <div ref={containerRef} className="snap-y snap-mandatory h-screen overflow-y-auto bg-surface-base">
+    <div ref={containerRef} className="snap-y snap-mandatory h-screen overflow-y-auto bg-surface-base scrollbar-none">
       <Navbar isDark={isDark} toggleTheme={toggleTheme} onStart={onStart} />
 
       {/* --- SECTION: HERO --- */}
       <section 
         ref={heroRef}
-        className="relative min-h-screen snap-start flex flex-center items-center justify-center overflow-hidden bg-grid"
+        className="relative min-h-screen snap-start flex items-center justify-center overflow-hidden bg-grid py-20 lg:py-32"
       >
-        {/* Background Effects */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#0B1512] via-[#0F1A14] to-[#061510] animate-gradShift bg-[length:200%_200%]" />
         
         {/* Parallax Orbs */}
-        <motion.div 
-          style={{ y: orb1Y }}
-          className="floating-orb w-[500px] h-[500px] bg-gn-600/10 top-[-100px] left-[-100px] animate-floatSlow"
-        />
-        <motion.div 
-          style={{ y: orb2Y }}
-          className="floating-orb w-[400px] h-[400px] bg-gn-500/8 bottom-[-50px] right-[-50px] animate-float"
-        />
-        <motion.div 
-          style={{ y: orb3Y }}
-          className="floating-orb w-[200px] h-[200px] bg-gn-400/15 top-[20%] right-[10%] animate-float delay-3s00"
-        />
+        <motion.div style={{ y: orb1Y }} className="floating-orb w-[600px] h-[600px] bg-gn-600/5 top-[-200px] left-[-200px] animate-floatSlow" />
+        <motion.div style={{ y: orb2Y }} className="floating-orb w-[500px] h-[500px] bg-gn-500/5 bottom-[-100px] right-[-100px] animate-float" />
+        <motion.div style={{ y: orb3Y }} className="floating-orb w-[300px] h-[300px] bg-gn-400/10 top-[20%] right-[5%] animate-floatSlow delay-1000" />
 
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#0B1512_100%)] pointer-events-none" />
 
-        {/* Hero Content */}
-        <div className="relative z-10 text-center px-6 max-w-5xl">
+        <div className="relative z-10 text-center px-6 max-w-6xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-gn-500/30 bg-gn-500/[0.08] mb-8"
+            className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full border border-white/[0.05] bg-white/[0.02] mb-10 shadow-2xl"
           >
-            <div className="w-2 h-2 rounded-full bg-gn-500 animate-pulse" />
-            <span className="text-gn-400 text-xs font-semibold tracking-wider uppercase">AI-Powered · Schema-Aware · Zero Login</span>
+            <div className="w-2 h-2 rounded-full bg-gn-500 animate-pulse shadow-[0_0_10px_#22c55e]" />
+            <span className="text-white/50 text-[10px] font-bold tracking-[0.25em] uppercase">V2.0 · Fine-Tuned LLM · Now Open</span>
           </motion.div>
 
           <motion.h1
-            initial={{ opacity: 0, y: 40 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.8, ease: "easeOut" }}
-            className="text-5xl md:text-8xl font-bold text-white mb-2 tracking-tight"
+            transition={{ delay: 0.1 }}
+            className="text-6xl md:text-8xl lg:text-9xl font-bold text-white mb-4 tracking-tighter leading-[0.95]"
           >
-            Query your database
+            Query data
           </motion.h1>
           <motion.h1
-            initial={{ opacity: 0, y: 40 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15, duration: 0.8, ease: "easeOut" }}
-            className="text-5xl md:text-8xl font-bold bg-gradient-to-r from-gn-400 to-gn-600 bg-clip-text text-transparent mb-8 tracking-tight"
+            transition={{ delay: 0.2 }}
+            className="text-6xl md:text-8xl lg:text-9xl font-bold bg-gradient-to-r from-gn-400 via-gn-500 to-gn-300 bg-clip-text text-transparent mb-10 tracking-tighter leading-[0.95]"
           >
             in plain English
           </motion.h1>
@@ -120,48 +106,43 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, isDark, toggl
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.2, duration: 1 }}
-            className="text-white/60 text-lg md:text-xl max-w-2xl mx-auto mb-4"
+            transition={{ delay: 0.4 }}
+            className="text-white/40 text-lg md:text-xl max-w-2xl mx-auto mb-14 leading-relaxed font-medium"
           >
-            Paste your schema. Ask anything. Get optimized SQL in under 2 seconds.
-          </motion.p>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.25, duration: 1 }}
-            className="text-white/30 text-sm mb-12"
-          >
-            No account required. No setup. No credit card.
+            Synthesize optimized SQL from natural language in seconds. <br className="hidden md:block" />
+            No account, no setup, no friction. Just your schema and your curiosity.
           </motion.p>
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3, duration: 0.6, type: "spring" }}
-            className="flex flex-col items-center gap-8"
+            transition={{ delay: 0.5 }}
+            className="flex flex-col items-center gap-12"
           >
-            <button 
+            <motion.button 
+              whileHover={{ y: -4, scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={onStart}
-              className="glow-btn text-lg px-12 py-5 transform transition-transform hover:scale-105 hover:-translate-y-1 active:scale-95"
+              className="glow-btn text-xl px-16 py-6 shadow-gn-500/20"
             >
-              Try Free — No Login Required
-            </button>
+              Launch Query Engine
+            </motion.button>
 
-            <div className="flex flex-wrap justify-center gap-4">
+            <div className="flex flex-wrap justify-center gap-6">
               {[
-                { icon: Database, text: "200+ Schemas tested" },
-                { icon: Zap, text: "<2s response" },
-                { icon: BarChart3, text: "10k+ training pairs" },
-                { icon: CheckCircle2, text: "100% free" }
+                { icon: Database, text: "Multi-Engine Support" },
+                { icon: Zap, text: "Sub-2s Latency" },
+                { icon: BarChart3, text: "Relationship Aware" },
+                { icon: CheckCircle2, text: "Privacy First" }
               ].map((item, i) => (
                 <motion.div
                   key={i}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 + (i * 0.08), duration: 0.5 }}
-                  className="glass flex items-center gap-2 px-4 py-2 text-xs text-white/50 border-white/[0.03]"
+                  transition={{ delay: 0.6 + (i * 0.1) }}
+                  className="flex items-center gap-2.5 px-5 py-2.5 rounded-2xl bg-white/[0.02] border border-white/[0.04] text-[10px] font-bold text-white/30 uppercase tracking-[0.15em] shadow-sm"
                 >
-                  <item.icon size={14} className="text-gn-500/60" />
+                  <item.icon size={14} className="text-gn-500/40" />
                   <span>{item.text}</span>
                 </motion.div>
               ))}
@@ -171,97 +152,88 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, isDark, toggl
 
         {/* Scroll Indicator */}
         <motion.div 
-          animate={{ y: [0, 10, 0] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/20 flex flex-col items-center gap-2"
+          animate={{ y: [0, 12, 0], opacity: [0.2, 0.5, 0.2] }}
+          transition={{ repeat: Infinity, duration: 2.5 }}
+          className="absolute bottom-12 left-1/2 -translate-x-1/2 text-white/20 flex flex-col items-center gap-3"
         >
-          <span className="text-[10px] uppercase tracking-[0.2em]">Scroll</span>
+          <span className="text-[9px] uppercase font-bold tracking-[0.4em]">Scroll</span>
           <ChevronDown size={20} />
         </motion.div>
       </section>
 
       {/* --- SECTION: FEATURES --- */}
-      <section 
-        className="min-h-screen snap-start bg-[#0F1A14] flex items-center py-32 px-6 md:px-12 relative overflow-hidden"
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent pointer-events-none" />
+      <section className="min-h-screen snap-start bg-[#09100E] flex items-center py-24 lg:py-32 px-6 md:px-12 relative overflow-hidden">
+        <div className="absolute inset-0 bg-grid opacity-30" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/5 to-transparent" />
         
-        <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-20">
-          <div className="lg:col-span-5 flex flex-col justify-center">
-            <span className="label-tag mb-4 block">What it does</span>
-            <h2 className="text-4xl md:text-6xl font-bold text-white mb-8 leading-tight">
-              Schema-aware AI <br />
-              <span className="text-white/40">built for accuracy.</span>
+        <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 items-center">
+          <div className="lg:col-span-5">
+            <span className="label-tag mb-6 block tracking-[0.3em]">Core Intelligence</span>
+            <h2 className="text-5xl md:text-7xl font-bold text-white mb-10 leading-[1.05] tracking-tight">
+              A brain built for <br />
+              <span className="text-white/20">relational data.</span>
             </h2>
-            <p className="text-white/50 text-lg max-w-md leading-relaxed">
-              Unlike generic LLMs, QueryMind is specialized for database operations. It understands table constraints and relationship hierarchies.
+            <p className="text-white/40 text-lg max-w-md leading-relaxed font-medium mb-12">
+              Unlike generic LLMs, QueryMind is fine-tuned on 15,000+ complex SQL scenarios, ensuring accurate JOINs and optimized performance.
             </p>
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={onStart}
+              className="flex items-center gap-3 text-gn-400 font-bold uppercase tracking-widest text-sm group"
+            >
+              Learn about our architecture 
+              <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform" />
+            </motion.button>
           </div>
 
           <div className="lg:col-span-7 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FeatureCard 
-              index={0}
-              icon={<Database />}
-              title="Schema Aware"
-              desc="Upload any SQL schema. AI maps every table, column and relationship instantly."
-            />
-            <FeatureCard 
-              index={1}
-              icon={<Code />}
-              title="Optimized SQL"
-              desc="No SELECT *. Real JOINs, proper WHERE clauses, LIMIT on everything."
-            />
-            <FeatureCard 
-              index={2}
-              icon={<Zap />}
-              title="Under 2 Seconds"
-              desc="HuggingFace inference. Your SQL appears before you finish reading the question."
-            />
-            <FeatureCard 
-              index={3}
-              icon={<Lock />}
-              title="Zero Login"
-              desc="No account. No API key. No credit card. Paste schema, ask, done."
-            />
+            <FeatureCard index={0} icon={<Database />} title="Schema Deep-Link" desc="Recursive mapping of tables, foreign keys, and column constraints." />
+            <FeatureCard index={1} icon={<Code />} title="Production SQL" desc="Zero-blob generation. Only indexed columns and optimized subqueries." />
+            <FeatureCard index={2} icon={<Zap />} title="Hyper-Inference" desc="Sub-second processing via specialized transformer architectures." />
+            <FeatureCard index={3} icon={<Lock />} title="Privacy by Design" desc="Your schema data never leaves your browser's persistent storage." />
           </div>
         </div>
       </section>
 
       {/* --- SECTION: CTA FOOTER --- */}
-      <section className="min-h-[80vh] snap-start flex items-center justify-center px-6 bg-surface-base">
+      <section className="min-h-screen snap-start flex items-center justify-center px-6 bg-surface-base py-24 lg:py-32">
         <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="glass-card max-w-4xl w-full text-center py-20 relative overflow-hidden group"
+          className="panel max-w-5xl w-full text-center py-24 px-12 relative overflow-hidden group border-white/[0.03] bg-transparent"
         >
-          <div className="absolute inset-0 bg-gn-500/[0.02] group-hover:bg-gn-500/[0.04] transition-colors pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(34,197,94,0.03)_0%,transparent_70%)] pointer-events-none" />
           
-          <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">Ready to query smarter?</h2>
-          <p className="text-white/40 text-lg mb-12 max-w-lg mx-auto">
-            Takes 30 seconds to start. No setup required. Join 5,000+ developers automating their SQL.
+          <h2 className="text-5xl md:text-7xl font-bold text-white mb-8 tracking-tight leading-tight">
+            Stop writing boilerplate. <br />
+            <span className="text-white/20">Start asking questions.</span>
+          </h2>
+          <p className="text-white/30 text-lg mb-16 max-w-xl mx-auto leading-relaxed">
+            Takes 30 seconds to configure. 100% free while in beta. Join thousands of data engineers today.
           </p>
           
-          <button 
+          <motion.button 
+            whileHover={{ y: -5, scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={onStart}
-            className="glow-btn text-xl px-16 py-6 mb-12 transform transition-transform hover:scale-105"
+            className="glow-btn text-xl px-20 py-7 mb-16 shadow-gn-500/20"
           >
-            Get Started Now
-          </button>
+            Enter The Engine
+          </motion.button>
 
-          <div className="flex flex-col md:flex-row justify-center items-center gap-6 text-xs text-white/30 uppercase tracking-[0.1em]">
-            <div className="flex items-center gap-2"><CheckCircle2 size={14} /> No login required</div>
-            <div className="hidden md:block w-1 h-1 rounded-full bg-white/10" />
-            <div className="flex items-center gap-2"><CheckCircle2 size={14} /> Works with any SQL database</div>
-            <div className="hidden md:block w-1 h-1 rounded-full bg-white/10" />
-            <div className="flex items-center gap-2"><CheckCircle2 size={14} /> Completely free</div>
+          <div className="flex flex-col md:flex-row justify-center items-center gap-8 text-[10px] font-bold text-white/20 uppercase tracking-[0.25em]">
+            <div className="flex items-center gap-3"><CheckCircle2 size={16} className="text-gn-500/40" /> Zero Authentication</div>
+            <div className="hidden md:block w-1.5 h-1.5 rounded-full bg-white/5" />
+            <div className="flex items-center gap-3"><CheckCircle2 size={16} className="text-gn-500/40" /> Any SQL Dialect</div>
+            <div className="hidden md:block w-1.5 h-1.5 rounded-full bg-white/5" />
+            <div className="flex items-center gap-3"><CheckCircle2 size={16} className="text-gn-500/40" /> Private Storage</div>
           </div>
         </motion.div>
       </section>
 
-      {/* Footer Muted */}
-      <footer className="py-12 text-center text-white/10 text-[10px] uppercase tracking-widest border-t border-white/[0.03]">
-        &copy; 2026 QueryMind AI — Zero Gravity SQL Engine
+      <footer className="py-16 text-center text-white/10 text-[10px] uppercase tracking-[0.5em] font-bold border-t border-white/[0.02]">
+        &copy; 2026 QueryMind AI &bull; The Zero Gravity SQL Protocol
       </footer>
     </div>
   );

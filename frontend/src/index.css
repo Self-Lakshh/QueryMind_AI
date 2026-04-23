@@ -9,36 +9,96 @@
   --color-gn-500: #22c55e;
   --color-gn-400: #4ade80;
   --color-gn-300: #86efac;
+  --color-gn-900: #14532d;
+
+  --font-inter: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-glow-pulse: glow-pulse 3s ease-in-out infinite;
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  @keyframes glow-pulse {
+    0%, 100% { opacity: 1; filter: brightness(1); }
+    50% { opacity: 0.8; filter: brightness(1.1); }
+  }
 }
 
-body {
-  background-color: #0B1512;
-  color: white;
-  font-family: "Inter", sans-serif;
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-surface-base);
+    color: white;
+    font-family: var(--font-inter);
+    line-height: 1.5;
+    @apply antialiased overflow-x-hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+
+  ::selection {
+    background-color: var(--color-gn-500);
+    color: black;
+  }
+
+  ::-webkit-scrollbar {
+    width: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-gn-500);
+  }
 }
 
-.glass {
-  backdrop-filter: blur(20px);
-  background-color: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 1rem;
+@layer components {
+  .panel {
+    @apply bg-surface-100/40 backdrop-blur-3xl border border-white/[0.05] rounded-[24px] 
+           shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all duration-300 hover:border-white/[0.08] hover:shadow-[0_30px_60px_rgba(0,0,0,0.4)];
+  }
+
+  .glass-card {
+    @apply bg-white/[0.02] backdrop-blur-2xl border border-white/[0.05] rounded-2xl 
+           transition-all duration-300 hover:bg-white/[0.04] hover:border-white/[0.1];
+  }
+
+  .glow-btn {
+    @apply bg-gn-500 text-black font-bold py-3 px-8 rounded-xl shadow-[0_0_40px_rgba(34,197,94,0.15)]
+           hover:shadow-[0_0_60px_rgba(34,197,94,0.3)] hover:bg-gn-400 transition-all duration-200
+           active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .label-tag {
+    @apply text-[10px] font-bold uppercase tracking-[0.15em] text-gn-400 opacity-80;
+  }
+
+  .input-dark {
+    @apply bg-surface-base border border-white/[0.08] rounded-xl px-4 py-3 text-white/90 
+           placeholder:text-white/20 focus:outline-none focus:border-gn-500/50 focus:ring-1 focus:ring-gn-500/20 
+           transition-all duration-200;
+  }
 }
 
-.glow-btn {
-  background-color: #22c55e;
-  color: black;
-  font-weight: 600;
-  border-radius: 0.75rem;
-  padding: 0.75rem 2rem;
-  transition: all 0.2s;
+@utility text-glow {
+  text-shadow: 0 0 30px rgba(34,197,94,0.4);
 }
 
-.glow-btn:hover {
-  background-color: #4ade80;
-  box-shadow: 0 0 30px rgba(34, 197, 94, 0.2);
-}
-
-.bg-grid {
-  background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.04) 1px, transparent 0);
-  background-size: 32px 32px;
+@utility bg-grid {
+  background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0);
+  background-size: 40px 40px;
 }

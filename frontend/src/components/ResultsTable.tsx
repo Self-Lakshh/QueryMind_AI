@@ -24,29 +24,40 @@ interface ResultsTableProps {
   };
 }
 
-export const ResultsTable: React.FC<ResultsTableProps> = ({ results }) => {
+export const ResultsTable = React.memo<ResultsTableProps>(({ results }) => {
   const [viewMode, setViewMode] = React.useState<'table' | 'chart'>('table');
 
   if (results.error) {
     return (
-      <div className="panel bg-red-500/5 border-red-500/10 flex items-center gap-4 py-8">
-        <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center">
-          <AlertCircle className="text-red-400" />
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="panel bg-red-500/5 border-red-500/10 flex items-center gap-6 p-8 shadow-[0_0_40px_rgba(239,68,68,0.05)]"
+      >
+        <div className="w-14 h-14 rounded-2xl bg-red-500/10 flex items-center justify-center shrink-0">
+          <AlertCircle className="text-red-400" size={28} />
         </div>
         <div>
-          <p className="text-sm font-bold text-red-400 uppercase tracking-widest mb-1">Execution Error</p>
-          <p className="text-xs text-red-400/60 leading-relaxed">{results.error}</p>
+          <h4 className="text-sm font-bold text-red-400 uppercase tracking-[0.2em] mb-1.5">Execution Error</h4>
+          <p className="text-xs text-red-400/60 leading-relaxed max-w-xl">{results.error}</p>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   if (results.rows.length === 0) {
     return (
-      <div className="panel flex flex-col items-center justify-center py-12 text-center">
-        <Table size={32} className="text-white/10 mb-4" />
-        <p className="text-white/30 text-sm italic">Query returned 0 results</p>
-      </div>
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="panel flex flex-col items-center justify-center py-20 text-center border-dashed border-white/5"
+      >
+        <div className="w-16 h-16 rounded-full bg-white/[0.02] flex items-center justify-center mb-4">
+          <Table size={32} className="text-white/10" />
+        </div>
+        <h4 className="text-white/40 font-bold uppercase tracking-widest text-xs mb-1">Zero Results</h4>
+        <p className="text-white/20 text-[11px] leading-relaxed">The query executed successfully but returned no data.</p>
+      </motion.div>
     );
   }
 
@@ -69,48 +80,57 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({ results }) => {
     if (chartType === 'single') {
       const val = results.rows[0][numericCols[0]];
       return (
-        <div className="flex flex-col items-center justify-center py-16">
-          <span className="text-[10px] text-white/30 uppercase tracking-[0.2em] mb-2">{numericCols[0]}</span>
-          <span className="text-6xl font-bold text-gn-400 text-glow">{val.toLocaleString()}</span>
+        <div className="flex flex-col items-center justify-center py-20">
+          <span className="text-[11px] font-bold text-white/20 uppercase tracking-[0.25em] mb-4">{numericCols[0]}</span>
+          <span className="text-7xl font-bold text-gn-400 text-glow leading-none">{val.toLocaleString()}</span>
         </div>
       );
     }
 
     if (chartType === 'bar') {
       return (
-        <div className="h-[350px] w-full mt-4">
+        <div className="h-[400px] w-full mt-6">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+            <BarChart data={chartData} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
               <XAxis 
                 dataKey={textCols[0]} 
-                stroke="rgba(255,255,255,0.4)" 
+                stroke="rgba(255,255,255,0.3)" 
                 fontSize={10} 
                 tickLine={false} 
                 axisLine={false} 
+                dy={10}
               />
               <YAxis 
-                stroke="rgba(255,255,255,0.4)" 
+                stroke="rgba(255,255,255,0.3)" 
                 fontSize={10} 
                 tickLine={false} 
                 axisLine={false} 
+                dx={-10}
               />
               <Tooltip 
+                cursor={{ fill: 'rgba(255,255,255,0.02)' }}
                 contentStyle={{ 
                   backgroundColor: '#0B1512', 
-                  border: '1px solid rgba(34,197,94,0.3)', 
-                  borderRadius: '12px',
+                  border: '1px solid rgba(255,255,255,0.08)', 
+                  borderRadius: '16px',
+                  boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
                   fontSize: '12px'
                 }} 
-                itemStyle={{ color: '#22c55e' }}
+                itemStyle={{ color: '#22c55e', fontWeight: 'bold' }}
               />
               <Bar 
                 dataKey={numericCols[0]} 
                 fill="#22c55e" 
-                radius={[4, 4, 0, 0]} 
+                radius={[6, 6, 0, 0]} 
                 fillOpacity={0.8}
-                animationDuration={1500}
-              />
+                animationDuration={2000}
+                animationEasing="ease-out"
+              >
+                {chartData.map((_, index) => (
+                  <Cell key={`cell-${index}`} fillOpacity={0.6 + (index / chartData.length) * 0.4} />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -119,28 +139,30 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({ results }) => {
 
     if (chartType === 'line') {
       return (
-        <div className="h-[350px] w-full mt-4">
+        <div className="h-[400px] w-full mt-6">
           <ResponsiveContainer width="100%" height="100%">
-            <ReLineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+            <ReLineChart data={chartData} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
               <XAxis 
                 dataKey={results.columns[0]} 
-                stroke="rgba(255,255,255,0.4)" 
+                stroke="rgba(255,255,255,0.3)" 
                 fontSize={10} 
                 tickLine={false} 
                 axisLine={false} 
+                dy={10}
               />
               <YAxis 
-                stroke="rgba(255,255,255,0.4)" 
+                stroke="rgba(255,255,255,0.3)" 
                 fontSize={10} 
                 tickLine={false} 
                 axisLine={false} 
+                dx={-10}
               />
               <Tooltip 
                 contentStyle={{ 
                   backgroundColor: '#0B1512', 
-                  border: '1px solid rgba(34,197,94,0.3)', 
-                  borderRadius: '12px',
+                  border: '1px solid rgba(255,255,255,0.08)', 
+                  borderRadius: '16px',
                   fontSize: '12px'
                 }} 
               />
@@ -150,9 +172,10 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({ results }) => {
                   type="monotone" 
                   dataKey={col} 
                   stroke={i === 0 ? "#22c55e" : i === 1 ? "#3b82f6" : "#f59e0b"} 
-                  strokeWidth={2}
-                  dot={{ fill: i === 0 ? "#22c55e" : i === 1 ? "#3b82f6" : "#f59e0b", r: 3 }}
-                  animationDuration={1500}
+                  strokeWidth={3}
+                  dot={{ fill: i === 0 ? "#22c55e" : i === 1 ? "#3b82f6" : "#f59e0b", r: 4, strokeWidth: 2, stroke: '#0B1512' }}
+                  activeDot={{ r: 6, strokeWidth: 0 }}
+                  animationDuration={2000}
                 />
               ))}
             </ReLineChart>
@@ -167,46 +190,51 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({ results }) => {
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="panel overflow-hidden"
+      className="panel p-0 overflow-hidden border-white/[0.05]"
     >
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <div className="w-8 h-8 rounded-lg bg-gn-500/10 flex items-center justify-center">
-            {viewMode === 'table' ? <Table size={16} className="text-gn-400" /> : <BarChart3 size={16} className="text-gn-400" />}
+      <div className="p-6 pb-0 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div className="flex items-center gap-5">
+          <div className="w-10 h-10 rounded-xl bg-gn-500/10 flex items-center justify-center shadow-inner">
+            {viewMode === 'table' ? <Table size={20} className="text-gn-400" /> : <BarChart3 size={20} className="text-gn-400" />}
           </div>
-          <div className="flex bg-white/5 p-1 rounded-lg">
+          <div className="flex bg-surface-base p-1 rounded-xl border border-white/[0.03]">
             <button 
               onClick={() => setViewMode('table')}
               className={cn(
-                "px-3 py-1 text-[10px] font-bold rounded-md transition-all",
-                viewMode === 'table' ? "bg-white/10 text-white" : "text-white/30 hover:text-white/50"
+                "px-4 py-1.5 text-[11px] font-bold rounded-lg transition-all tracking-wider uppercase",
+                viewMode === 'table' ? "bg-gn-500 text-black shadow-lg shadow-gn-500/10" : "text-white/30 hover:text-white/50"
               )}
             >
-              TABLE
+              Table
             </button>
             {chartType && (
               <button 
                 onClick={() => setViewMode('chart')}
                 className={cn(
-                  "px-3 py-1 text-[10px] font-bold rounded-md transition-all",
-                  viewMode === 'chart' ? "bg-white/10 text-white" : "text-white/30 hover:text-white/50"
+                  "px-4 py-1.5 text-[11px] font-bold rounded-lg transition-all tracking-wider uppercase",
+                  viewMode === 'chart' ? "bg-gn-500 text-black shadow-lg shadow-gn-500/10" : "text-white/30 hover:text-white/50"
                 )}
               >
-                CHART
+                Insights
               </button>
             )}
           </div>
         </div>
         <div className="flex items-center gap-4">
-          {results.rows.length > 50 && viewMode === 'chart' && (
-            <span className="text-[9px] text-white/20 uppercase tracking-widest mr-2">Showing first 50 rows</span>
-          )}
-          <span className="bg-gn-500/10 text-gn-400 text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-wider">
-            {results.total} rows
-          </span>
-          <button className="p-2 rounded-lg hover:bg-white/5 text-white/20 hover:text-white transition-all">
+          <div className="flex flex-col items-end">
+            <span className="bg-gn-500/10 text-gn-400 text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-widest">
+              {results.total} records
+            </span>
+            {results.rows.length > 50 && viewMode === 'chart' && (
+              <span className="text-[9px] text-white/20 uppercase tracking-widest mt-1.5">Visualizing first 50</span>
+            )}
+          </div>
+          <motion.button 
+            whileTap={{ scale: 0.95 }}
+            className="p-2.5 rounded-xl bg-white/[0.03] border border-white/5 text-white/40 hover:text-white hover:bg-white/5 transition-all shadow-sm"
+          >
             <Download size={18} />
-          </button>
+          </motion.button>
         </div>
       </div>
 
@@ -217,19 +245,15 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({ results }) => {
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 10 }}
-            className="overflow-x-auto max-h-[400px] overflow-y-auto border border-white/[0.05] rounded-xl scrollbar-thin"
+            className="overflow-x-auto max-h-[500px] overflow-y-auto scrollbar-thin"
           >
-            <table className={cn(
-              "w-full text-left text-[12px] border-collapse",
-              results.columns.length > 6 ? "table-fixed" : "table-auto"
-            )}>
+            <table className="w-full text-left text-[13px] border-collapse min-w-[800px]">
               <thead className="sticky top-0 z-10">
-                <tr className="bg-surface-200 backdrop-blur-md">
+                <tr className="bg-surface-200/95 backdrop-blur-xl">
                   {results.columns.map(col => (
                     <th 
                       key={col} 
-                      className="px-4 py-4 font-bold text-gn-400 uppercase tracking-widest border-b border-white/[0.05] whitespace-nowrap"
-                      style={{ width: results.columns.length > 6 ? '200px' : 'auto' }}
+                      className="px-6 py-5 font-bold text-white/40 uppercase tracking-[0.15em] border-b border-white/[0.05] whitespace-nowrap text-[11px]"
                     >
                       {col}
                     </th>
@@ -240,18 +264,17 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({ results }) => {
                 {results.rows.map((row, rowIndex) => (
                   <motion.tr 
                     key={rowIndex}
-                    initial={rowIndex < 10 ? { opacity: 0, x: -10 } : {}}
-                    animate={rowIndex < 10 ? { opacity: 1, x: 0 } : {}}
-                    transition={{ delay: rowIndex * 0.05 }}
-                    className={cn(
-                      "hover:bg-white/[0.02] transition-colors",
-                      rowIndex % 2 === 1 && "bg-white/[0.01]"
-                    )}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: rowIndex < 15 ? rowIndex * 0.03 : 0 }}
+                    className="hover:bg-white/[0.02] transition-colors group"
                   >
                     {results.columns.map(col => (
-                      <td key={col} className="px-4 py-4 text-white/70 font-mono whitespace-nowrap overflow-hidden text-ellipsis">
+                      <td key={col} className="px-6 py-4 text-white/70 font-mono whitespace-nowrap">
                         {row[col] === null || row[col] === undefined ? (
-                          <span className="text-white/20 italic">null</span>
+                          <span className="text-white/10 italic">null</span>
+                        ) : typeof row[col] === 'number' ? (
+                          <span className="text-gn-400/80 font-semibold">{row[col].toLocaleString()}</span>
                         ) : (
                           String(row[col])
                         )}
@@ -265,14 +288,17 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({ results }) => {
         ) : (
           <motion.div
             key="chart"
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -10 }}
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            className="p-6 pt-0"
           >
-            {renderChart()}
+            <div className="glass-card bg-black/20 border-white/[0.03] p-6 rounded-3xl">
+              {renderChart()}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
     </motion.div>
   );
-};
+});
