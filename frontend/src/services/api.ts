@@ -1,44 +1,126 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+
+const apiClient = axios.create({
+  baseURL: `${API_BASE_URL}/api/v1`,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Request Logger Interceptor (Dev Mode Only)
+if (import.meta.env.DEV) {
+  apiClient.interceptors.request.use((config) => {
+    console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`, config.data || '');
+    return config;
+  });
+}
+
+/**
+ * Universal Error Handler
+ */
+const handleError = (error: unknown) => {
+  if (axios.isAxiosError(error)) {
+    const message = error.response?.data?.detail || error.message || 'An unexpected error occurred';
+    throw new Error(message);
+  }
+  throw error;
+};
 
 export const api = {
-  // Schema Endpoints
-  uploadSchema: async (name: string, file: File) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    const response = await axios.post(`${API_BASE_URL}/schema/upload?name=${name}`, formData);
-    return response.data;
+  // --- SCHEMA ENDPOINTS ---
+
+  async uploadSchema(file: File): Promise<{ name: string; tables: string[] }> {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const name = file.name.split('.')[0] + "_" + Date.now();
+      const response = await apiClient.post(`/schema/upload?name=${name}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return response.data;
+    } catch (error) {
+      return handleError(error);
+    }
   },
 
-  pasteSchema: async (name: string, text: string) => {
-    const response = await axios.post(`${API_BASE_URL}/schema/paste`, { name, text });
-    return response.data;
+  async pasteSchema(text: string, name: string): Promise<{ name: string; tables: string[] }> {
+    try {
+      const response = await apiClient.post('/schema/paste', { name, text });
+      return response.data;
+    } catch (error) {
+      return handleError(error);
+    }
   },
 
-  listSchemas: async () => {
-    const response = await axios.get(`${API_BASE_URL}/schema/list`);
-    return response.data;
+  async fetchSchemaTables(name: string): Promise<{ tables: string[]; columns: Record<string, string[]> }> {
+    try {
+      const response = await apiClient.get(`/schema/tables/${name}`);
+      return response.data;
+    } catch (error) {
+      return handleError(error);
+    }
   },
 
-  // Query Endpoints
-  generateSQL: async (question: string, schemaName: string) => {
-    const response = await axios.post(`${API_BASE_URL}/query/generate`, { question, schema_name: schemaName });
-    return response.data;
+  async fetchSchemaRelationships(name: string): Promise<{ foreign_keys: any[] }> {
+    try {
+      const response = await apiClient.get(`/schema/relationships/${name}`);
+      return response.data;
+    } catch (error) {
+      return handleError(error);
+    }
   },
 
-  validateSQL: async (sql: string, schemaName: string) => {
-    const response = await axios.post(`${API_BASE_URL}/query/validate`, { sql, schema_name: schemaName });
-    return response.data;
+  // --- QUERY ENDPOINTS ---
+
+  async generateSQL(question: string, schemaName: string): Promise<{ sql: string; tables_used: string[] }> {
+    try {
+      const response = await apiClient.post('/query/generate', { question, schema_name: schemaName });
+      return response.data;
+    } catch (error) {
+      return handleError(error);
+    }
   },
 
-  executeSQL: async (sql: string, schemaName: string) => {
-    const response = await axios.post(`${API_BASE_URL}/query/execute`, { sql, schema_name: schemaName });
-    return response.data;
+  async validateSQL(sql: string, schemaName: string): Promise<{ valid: boolean; error: string | null }> {
+    try {
+      const response = await apiClient.post('/query/validate', { sql, schema_name: schemaName });
+      return response.data;
+    } catch (error) {
+      return handleError(error);
+    }
   },
 
-  explainSQL: async (sql: string, schemaName: string) => {
-    const response = await axios.post(`${API_BASE_URL}/query/explain`, { sql, schema_name: schemaName });
-    return response.data;
+  async executeSQL(sql: string, schemaName: string): Promise<{ columns: string[]; rows: any[]; total: number; error?: string }> {
+    try {
+      const response = await apiClient.post('/query/execute', { sql, schema_name: schemaName });
+      // Backend returns 'count' instead of 'total', mapping it here
+      const data = response.data;
+      return {
+        ...data,
+        total: data.count || 0
+      };
+    } catch (error) {
+      return handleError(error);
+    }
+  },
+
+  async explainSQL(sql: string, schemaName: string): Promise<{ explanation: string }> {
+    try {
+      const response = await apiClient.post('/query/explain', { sql, schema_name: schemaName });
+      return response.data;
+    } catch (error) {
+      return handleError(error);
+    }
+  },
+
+  async getQueryCost(sql: string, schemaName: string): Promise<{ cost: "LOW" | "MEDIUM" | "HIGH" }> {
+    try {
+      const response = await apiClient.post('/query/cost', { sql, schema_name: schemaName });
+      return response.data;
+    } catch (error) {
+      return handleError(error);
+    }
   }
 };

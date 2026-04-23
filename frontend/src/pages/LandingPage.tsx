@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import React, { useRef } from 'react';
+import { motion } from 'framer-motion';
 import { 
   Database, 
   Zap, 
@@ -7,16 +7,10 @@ import {
   Lock, 
   ArrowRight, 
   ChevronDown, 
-  Sun, 
-  Moon,
   BarChart3,
-  Users,
-  Search,
   CheckCircle2
 } from 'lucide-react';
 import { useParallax } from '../hooks/useParallax';
-import { useScrollReveal } from '../hooks/useScrollReveal';
-import { cn } from '../lib/utils';
 
 // --- Types ---
 interface LandingPageProps {
@@ -38,7 +32,7 @@ const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; desc: string
       className="glass-card glass-hover group cursor-pointer relative overflow-hidden"
     >
       <div className="w-12 h-12 rounded-xl bg-gn-500/10 flex items-center justify-center mb-4 group-hover:bg-gn-500/20 transition-colors">
-        {React.cloneElement(icon as React.ReactElement, { className: "text-gn-400" })}
+        {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { className: "text-gn-400" }) : icon}
       </div>
       <h3 className="text-xl font-semibold text-white mb-2">{title}</h3>
       <p className="text-white/50 text-sm leading-relaxed mb-4">{desc}</p>
@@ -65,7 +59,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, isDark, toggl
   const orb2Y = useParallax(heroRef, 200);
   const orb3Y = useParallax(heroRef, 300);
 
-  const { ref: featuresRef, inView: featuresInView } = useScrollReveal();
 
   return (
     <div ref={containerRef} className="snap-y snap-mandatory h-screen overflow-y-auto bg-surface-base">
