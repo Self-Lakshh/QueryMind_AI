@@ -5,7 +5,7 @@ import { api } from '../services/api';
 import { cn } from '../lib/utils';
 
 interface SchemaUploadProps {
-  onLoaded: (schema: any) => void;
+  onLoaded: (schema: { name: string, tables: string[] }) => void;
 }
 
 export const SchemaUpload: React.FC<SchemaUploadProps> = ({ onLoaded }) => {
@@ -33,8 +33,9 @@ export const SchemaUpload: React.FC<SchemaUploadProps> = ({ onLoaded }) => {
       const res = await api.pasteSchema(name, text);
       setSuccess(res.tables);
       onLoaded({ name, tables: res.tables });
-    } catch (err: any) {
-      setError(err.response?.data?.detail || "Failed to parse schema structure");
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { detail?: string } } }).response?.data?.detail || "Failed to parse schema structure";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -51,7 +52,7 @@ export const SchemaUpload: React.FC<SchemaUploadProps> = ({ onLoaded }) => {
       const res = await api.uploadSchema(file);
       setSuccess(res.tables);
       onLoaded(res); 
-    } catch (err: any) {
+    } catch {
       setError("File upload failed. Ensure the format is valid .sql or .txt");
     } finally {
       setLoading(false);
@@ -85,7 +86,7 @@ export const SchemaUpload: React.FC<SchemaUploadProps> = ({ onLoaded }) => {
       const res = await api.pasteSchema(schema.name, schema.sql);
       setSuccess(res.tables);
       onLoaded(res);
-    } catch (err) {
+    } catch {
       setError("Failed to reload saved schema");
     } finally {
       setLoading(false);

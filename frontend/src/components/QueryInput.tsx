@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Send, Sparkles, Loader2, Command } from 'lucide-react';
 import { cn } from '../lib/utils';

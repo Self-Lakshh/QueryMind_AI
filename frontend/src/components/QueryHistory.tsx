@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, X, Trash2, History, Database, Zap } from 'lucide-react';
+import { Clock, X, Trash2, History, Database } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 export interface HistoryItem {
@@ -71,7 +71,7 @@ export const QueryHistory: React.FC<QueryHistoryProps> = ({
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-thin">
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-thin relative">
               {history.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center p-8 opacity-50">
                   <div className="w-20 h-20 rounded-3xl bg-white/[0.02] border border-white/[0.05] flex items-center justify-center mb-6">

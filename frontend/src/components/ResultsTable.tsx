@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Table, Download, AlertCircle, BarChart3, LineChart, Hash } from 'lucide-react';
+import { Table, Download, AlertCircle, BarChart3 } from 'lucide-react';
 import { 
   BarChart, 
   Bar, 
@@ -18,7 +18,7 @@ import { cn } from '../lib/utils';
 interface ResultsTableProps {
   results: {
     columns: string[];
-    rows: any[];
+    rows: Record<string, unknown>[];
     total: number;
     error?: string;
   };
@@ -82,7 +82,7 @@ export const ResultsTable = React.memo<ResultsTableProps>(({ results }) => {
       return (
         <div className="flex flex-col items-center justify-center py-20">
           <span className="text-[11px] font-bold text-white/20 uppercase tracking-[0.25em] mb-4">{numericCols[0]}</span>
-          <span className="text-7xl font-bold text-gn-400 text-glow leading-none">{val.toLocaleString()}</span>
+          <span className="text-7xl font-bold text-gn-400 text-glow leading-none">{(val as number).toLocaleString()}</span>
         </div>
       );
     }
@@ -245,7 +245,7 @@ export const ResultsTable = React.memo<ResultsTableProps>(({ results }) => {
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 10 }}
-            className="overflow-x-auto max-h-[500px] overflow-y-auto scrollbar-thin"
+            className="overflow-x-auto max-h-[500px] overflow-y-auto scrollbar-thin relative"
           >
             <table className="w-full text-left text-[13px] border-collapse min-w-[800px]">
               <thead className="sticky top-0 z-10">

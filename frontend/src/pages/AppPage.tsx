@@ -1,10 +1,9 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, 
   Sun, 
   Moon, 
-  Sparkles, 
   AlertCircle,
   RefreshCcw,
   Database,
@@ -15,7 +14,8 @@ import { QueryInput } from '../components/QueryInput';
 import { SQLPreview } from '../components/SQLPreview';
 import { SQLExplanation } from '../components/SQLExplanation';
 import { ResultsTable } from '../components/ResultsTable';
-import { QueryHistory, HistoryItem } from '../components/QueryHistory';
+import { QueryHistory } from '../components/QueryHistory';
+import type { HistoryItem } from '../components/QueryHistory';
 import { api } from '../services/api';
 
 interface AppPageProps {
@@ -26,10 +26,10 @@ interface AppPageProps {
 
 export const AppPage: React.FC<AppPageProps> = ({ onBack, isDark, toggleTheme }) => {
   // State
-  const [schema, setSchema] = useState<any>(null);
+  const [schema, setSchema] = useState<{name: string, tables: string[] | null} | null>(null);
   const [generatedSQL, setGeneratedSQL] = useState('');
   const [sqlExplanation, setSqlExplanation] = useState('');
-  const [queryResults, setQueryResults] = useState<any>(null);
+  const [queryResults, setQueryResults] = useState<{ columns: string[], rows: Record<string, unknown>[], total: number } | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
   const [error, setError] = useState('');
@@ -38,7 +38,6 @@ export const AppPage: React.FC<AppPageProps> = ({ onBack, isDark, toggleTheme })
     return saved ? JSON.parse(saved) : [];
   });
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-  const [lastQuestion, setLastQuestion] = useState('');
 
   // Error Auto-Fade
   useEffect(() => {
@@ -72,7 +71,6 @@ export const AppPage: React.FC<AppPageProps> = ({ onBack, isDark, toggleTheme })
         setError(res.error);
       } else {
         setGeneratedSQL(res.sql);
-        setLastQuestion(question);
         
         try {
           const { cost } = await api.getQueryCost(res.sql, schema.name);
@@ -90,11 +88,11 @@ export const AppPage: React.FC<AppPageProps> = ({ onBack, isDark, toggleTheme })
             localStorage.setItem('querymind_history', JSON.stringify(updated));
             return updated;
           });
-        } catch (costErr) {
+        } catch {
           console.error("Could not fetch query cost for history");
         }
       }
-    } catch (err) {
+    } catch {
       setError("Failed to connect to AI Inference server.");
     } finally {
       setIsGenerating(false);
@@ -114,7 +112,7 @@ export const AppPage: React.FC<AppPageProps> = ({ onBack, isDark, toggleTheme })
       } else {
         setQueryResults({ ...res, total: res.total || res.count || 0 });
       }
-    } catch (err) {
+    } catch {
       setError("Database execution error.");
     } finally {
       setIsExecuting(false);
@@ -126,7 +124,7 @@ export const AppPage: React.FC<AppPageProps> = ({ onBack, isDark, toggleTheme })
     try {
       const res = await api.explainSQL(generatedSQL, schema.name);
       setSqlExplanation(res.explanation);
-    } catch (err) {
+    } catch {
       setError("Explanation failed.");
     }
   }, [generatedSQL, schema]);
@@ -136,12 +134,10 @@ export const AppPage: React.FC<AppPageProps> = ({ onBack, isDark, toggleTheme })
     setSqlExplanation('');
     setQueryResults(null);
     setError('');
-    setLastQuestion('');
   }, []);
 
   const handleHistorySelect = useCallback((item: HistoryItem) => {
     setGeneratedSQL(item.sql);
-    setLastQuestion(item.question);
     setQueryResults(null);
     setSqlExplanation('');
   }, []);

@@ -63,7 +63,7 @@ export const api = {
     }
   },
 
-  async fetchSchemaRelationships(name: string): Promise<{ foreign_keys: any[] }> {
+  async fetchSchemaRelationships(name: string): Promise<{ foreign_keys: { table: string, column: string, ref_table: string, ref_column: string }[] }> {
     try {
       const response = await apiClient.get(`/schema/relationships/${name}`);
       return response.data;
@@ -92,7 +92,7 @@ export const api = {
     }
   },
 
-  async executeSQL(sql: string, schemaName: string): Promise<{ columns: string[]; rows: any[]; total: number; count?: number; error?: string }> {
+  async executeSQL(sql: string, schemaName: string): Promise<{ columns: string[]; rows: Record<string, unknown>[]; total: number; count?: number; error?: string }> {
     try {
       const response = await apiClient.post('/query/execute', { sql, schema_name: schemaName });
       // Backend returns 'count' instead of 'total', mapping it here
