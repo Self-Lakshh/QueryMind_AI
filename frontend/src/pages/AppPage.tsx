@@ -7,13 +7,15 @@ import {
   Sparkles, 
   AlertCircle,
   RefreshCcw,
-  Database
+  Database,
+  Clock
 } from 'lucide-react';
 import { SchemaUpload } from '../components/SchemaUpload';
 import { QueryInput } from '../components/QueryInput';
 import { SQLPreview } from '../components/SQLPreview';
 import { SQLExplanation } from '../components/SQLExplanation';
 import { ResultsTable } from '../components/ResultsTable';
+import { QueryHistory, HistoryItem } from '../components/QueryHistory';
 import { api } from '../services/api';
 
 interface AppPageProps {
@@ -31,6 +33,12 @@ export const AppPage: React.FC<AppPageProps> = ({ onBack, isDark, toggleTheme })
   const [isGenerating, setIsGenerating] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
   const [error, setError] = useState('');
+  const [history, setHistory] = useState<HistoryItem[]>(() => {
+    const saved = localStorage.getItem('querymind_history');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [lastQuestion, setLastQuestion] = useState('');
 
   // Handlers
   const handleGenerate = async (question: string) => {
@@ -50,6 +58,28 @@ export const AppPage: React.FC<AppPageProps> = ({ onBack, isDark, toggleTheme })
         setError(res.error);
       } else {
         setGeneratedSQL(res.sql);
+        setLastQuestion(question);
+        
+        // Fetch cost and save to history
+        try {
+          const { cost } = await api.getQueryCost(res.sql, schema.name);
+          const newItem: HistoryItem = {
+            id: Date.now().toString(),
+            question,
+            sql: res.sql,
+            timestamp: Date.now(),
+            tables_used: res.tables_used,
+            cost: cost
+          };
+          
+          setHistory(prev => {
+            const updated = [newItem, ...prev].slice(0, 50);
+            localStorage.setItem('querymind_history', JSON.stringify(updated));
+            return updated;
+          });
+        } catch (costErr) {
+          console.error("Could not fetch query cost for history");
+        }
       }
     } catch (err) {
       setError("Failed to connect to AI Inference server.");
@@ -93,6 +123,27 @@ export const AppPage: React.FC<AppPageProps> = ({ onBack, isDark, toggleTheme })
     setSqlExplanation('');
     setQueryResults(null);
     setError('');
+    setLastQuestion('');
+  };
+
+  const handleHistorySelect = (item: HistoryItem) => {
+    setGeneratedSQL(item.sql);
+    setLastQuestion(item.question);
+    setQueryResults(null);
+    setSqlExplanation('');
+  };
+
+  const handleHistoryDelete = (id: string) => {
+    setHistory(prev => {
+      const updated = prev.filter(i => i.id !== id);
+      localStorage.setItem('querymind_history', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const handleHistoryClear = () => {
+    setHistory([]);
+    localStorage.removeItem('querymind_history');
   };
 
   return (
@@ -112,6 +163,16 @@ export const AppPage: React.FC<AppPageProps> = ({ onBack, isDark, toggleTheme })
         </div>
 
         <div className="flex items-center gap-4">
+          <button 
+            onClick={() => setIsHistoryOpen(true)} 
+            className="p-2 text-white/40 hover:text-white transition-colors relative"
+            title="Query History"
+          >
+            <Clock size={18} />
+            {history.length > 0 && (
+              <span className="absolute top-1 right-1 w-2 h-2 bg-gn-500 rounded-full border border-surface-100" />
+            )}
+          </button>
           <button onClick={handleReset} className="p-2 text-white/20 hover:text-white transition-colors" title="Clear all">
             <RefreshCcw size={18} />
           </button>
@@ -178,6 +239,15 @@ export const AppPage: React.FC<AppPageProps> = ({ onBack, isDark, toggleTheme })
 
         </div>
       </main>
+
+      <QueryHistory 
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+        history={history}
+        onSelect={handleHistorySelect}
+        onDelete={handleHistoryDelete}
+        onClear={handleHistoryClear}
+      />
     </div>
   );
 };
