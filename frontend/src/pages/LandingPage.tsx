@@ -1,0 +1,1 @@
+﻿export const LandingPage = ({ onStart, isDark, toggleTheme }: any) => <div className=" min-h-screen flex items-center justify-center\><h1>Landing Page</h1><button onClick={onStart}>Start</button></div>;
