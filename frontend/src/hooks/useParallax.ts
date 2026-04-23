@@ -1,5 +1,5 @@
 import { useScroll, useTransform, MotionValue } from 'framer-motion';
-import { RefObject } from 'react';
+import type { RefObject } from 'react';
 
 export function useParallax(ref: RefObject<HTMLElement | null>, distance: number): MotionValue<number> {
   const { scrollYProgress } = useScroll({

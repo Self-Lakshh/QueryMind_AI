@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { LandingPage } from './pages/LandingPage';
 import { AppPage } from './pages/AppPage';
@@ -38,42 +38,46 @@ const App: React.FC = () => {
 
   return (
     <ThemeProvider>
-      <ThemeContext.Consumer>
-        {({ isDark, toggleTheme }) => (
-          <AnimatePresence mode="wait">
-            {page === 'landing' ? (
-              <motion.div
-                key="landing"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-              >
-                <LandingPage 
-                  onStart={() => setPage('app')} 
-                  isDark={isDark} 
-                  toggleTheme={toggleTheme} 
-                />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="app"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-              >
-                <AppPage 
-                  onBack={() => setPage('landing')} 
-                  isDark={isDark} 
-                  toggleTheme={toggleTheme} 
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        )}
-      </ThemeContext.Consumer>
+      <AppContent page={page} setPage={setPage} />
     </ThemeProvider>
+  );
+};
+
+const AppContent: React.FC<{ page: 'landing' | 'app', setPage: (p: 'landing' | 'app') => void }> = ({ page, setPage }) => {
+  const { isDark, toggleTheme } = useTheme();
+
+  return (
+    <AnimatePresence mode="wait">
+      {page === 'landing' ? (
+        <motion.div
+          key="landing"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+        >
+          <LandingPage 
+            onStart={() => setPage('app')} 
+            isDark={isDark} 
+            toggleTheme={toggleTheme} 
+          />
+        </motion.div>
+      ) : (
+        <motion.div
+          key="app"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+        >
+          <AppPage 
+            onBack={() => setPage('landing')} 
+            isDark={isDark} 
+            toggleTheme={toggleTheme} 
+          />
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 

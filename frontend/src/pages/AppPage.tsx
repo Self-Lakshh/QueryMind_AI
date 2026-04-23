@@ -15,7 +15,6 @@ import { SQLPreview } from '../components/SQLPreview';
 import { SQLExplanation } from '../components/SQLExplanation';
 import { ResultsTable } from '../components/ResultsTable';
 import { api } from '../services/api';
-import { cn } from '../lib/utils';
 
 interface AppPageProps {
   onBack: () => void;
@@ -70,7 +69,7 @@ export const AppPage: React.FC<AppPageProps> = ({ onBack, isDark, toggleTheme })
       if (res.error) {
         setError(res.error);
       } else {
-        setQueryResults({ ...res, total: res.count });
+        setQueryResults({ ...res, total: res.total || res.count || 0 });
       }
     } catch (err) {
       setError("Database execution error.");

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import { Send, Sparkles, Loader2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 

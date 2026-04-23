@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, FileText, CheckCircle2, AlertCircle, X } from 'lucide-react';
+import { Upload, CheckCircle2, AlertCircle } from 'lucide-react';
 import { api } from '../services/api';
 import { cn } from '../lib/utils';
 
@@ -41,8 +41,7 @@ export const SchemaUpload: React.FC<SchemaUploadProps> = ({ onLoaded }) => {
     setError('');
     setSuccess(null);
     try {
-      const name = file.name.split('.')[0] + "_" + Date.now();
-      const res = await api.uploadSchema(name, file);
+      const res = await api.uploadSchema(file);
       setSuccess(res.tables);
       onLoaded({ name, tables: res.tables });
     } catch (err: any) {

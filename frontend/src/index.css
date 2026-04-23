@@ -1,91 +1,44 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer base {
-  html {
-    scroll-behavior: smooth;
-    scroll-snap-type: y mandatory;
-  }
-
-  body {
-    @apply font-inter bg-surface-base text-white overflow-x-hidden antialiased;
-  }
-
-  ::selection {
-    @apply bg-gn-500/30 text-gn-300;
-  }
-
-  /* Custom Thin Green Scrollbar */
-  ::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  ::-webkit-scrollbar-track {
-    @apply bg-surface-base;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    @apply bg-gn-900/50 rounded-full border-2 border-surface-base hover:bg-gn-500/50 transition-colors;
-  }
+@theme {
+  --color-surface-base: #0B1512;
+  --color-surface-100: #121F1B;
+  --color-surface-200: #1A2B26;
+  --color-surface-300: #243B34;
+  --color-gn-500: #22c55e;
+  --color-gn-400: #4ade80;
+  --color-gn-300: #86efac;
 }
 
-@layer components {
-  .glass {
-    @apply backdrop-blur-xl bg-white/[0.04] border border-white/[0.06] rounded-2xl;
-  }
-
-  .glass-hover {
-    @apply hover:bg-white/[0.07] hover:border-white/[0.12] transition-all duration-300;
-  }
-
-  .glass-card {
-    @apply glass shadow-[0_0_40px_rgba(34,197,94,0.06)] p-6;
-  }
-
-  .glow-btn {
-    @apply bg-gn-500 text-black font-semibold rounded-xl px-8 py-3 hover:bg-gn-400
-           shadow-[0_0_30px_rgba(34,197,94,0.2)] hover:shadow-[0_0_50px_rgba(34,197,94,0.4)]
-           active:scale-[0.97] transition-all duration-200 animate-glowPulse;
-  }
-
-  .label-tag {
-    @apply text-[11px] font-semibold text-gn-400 uppercase tracking-[0.15em];
-  }
-
-  .input-dark {
-    @apply w-full bg-surface-200 border border-white/[0.08] rounded-xl px-4 py-3
-           text-sm text-white/80 placeholder:text-white/20
-           focus:outline-none focus:border-gn-500/40 transition-colors;
-  }
-
-  .panel {
-    @apply glass-card rounded-2xl;
-  }
-
-  .floating-orb {
-    @apply absolute rounded-full pointer-events-none blur-[80px] animate-float;
-  }
+body {
+  background-color: #0B1512;
+  color: white;
+  font-family: "Inter", sans-serif;
 }
 
-@layer utilities {
-  .text-glow {
-    text-shadow: 0 0 20px rgba(34,197,94,0.5);
-  }
+.glass {
+  backdrop-filter: blur(20px);
+  background-color: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 1rem;
+}
 
-  .border-glow {
-    border-color: rgba(34,197,94,0.4);
-  }
+.glow-btn {
+  background-color: #22c55e;
+  color: black;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  padding: 0.75rem 2rem;
+  transition: all 0.2s;
+}
 
-  .bg-grid {
-    background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.04) 1px, transparent 0);
-    background-size: 32px 32px;
-  }
-  
-  .bg-noise {
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-    opacity: 0.02;
-  }
+.glow-btn:hover {
+  background-color: #4ade80;
+  box-shadow: 0 0 30px rgba(34, 197, 94, 0.2);
+}
+
+.bg-grid {
+  background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.04) 1px, transparent 0);
+  background-size: 32px 32px;
 }

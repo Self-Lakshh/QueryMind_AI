@@ -74,7 +74,7 @@ export const api = {
 
   // --- QUERY ENDPOINTS ---
 
-  async generateSQL(question: string, schemaName: string): Promise<{ sql: string; tables_used: string[] }> {
+  async generateSQL(question: string, schemaName: string): Promise<{ sql: string; tables_used: string[]; error?: string }> {
     try {
       const response = await apiClient.post('/query/generate', { question, schema_name: schemaName });
       return response.data;
@@ -92,7 +92,7 @@ export const api = {
     }
   },
 
-  async executeSQL(sql: string, schemaName: string): Promise<{ columns: string[]; rows: any[]; total: number; error?: string }> {
+  async executeSQL(sql: string, schemaName: string): Promise<{ columns: string[]; rows: any[]; total: number; count?: number; error?: string }> {
     try {
       const response = await apiClient.post('/query/execute', { sql, schema_name: schemaName });
       // Backend returns 'count' instead of 'total', mapping it here
