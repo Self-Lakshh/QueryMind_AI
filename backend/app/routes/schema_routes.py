@@ -18,15 +18,17 @@ async def upload_schema(name: str, file: UploadFile = File(...)):
     text = content.decode("utf-8")
     parsed = schema_parser.parse_schema_text(text)
     schema_dict = schema_parser.build_schema_dictionary(parsed)
+    schema_dict["name"] = name
     schemas_db[name] = schema_dict
-    return {"name": name, "tables": schema_parser.extract_tables(parsed)}
+    return schema_dict
 
 @router.post("/paste")
 async def paste_schema(request: SchemaPasteRequest):
     parsed = schema_parser.parse_schema_text(request.text)
     schema_dict = schema_parser.build_schema_dictionary(parsed)
+    schema_dict["name"] = request.name
     schemas_db[request.name] = schema_dict
-    return {"name": request.name, "tables": schema_parser.extract_tables(parsed)}
+    return schema_dict
 
 @router.get("/tables/{name}")
 async def get_tables(name: str):

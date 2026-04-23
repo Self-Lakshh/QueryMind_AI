@@ -25,13 +25,15 @@ async def generate_sql(request: GenerateRequest):
         raise HTTPException(status_code=404, detail="Schema not found")
     
     schema_info = schemas_db[request.schema_name]
-    from ..schema.schema_parser import schema_to_text
-    schema_str = schema_to_text(schema_info)
+    schema_str = schema_info.get("schema_str", "")
     
     payload = {
         "question": request.question,
         "schema_str": schema_str,
-        "schema_info": {"tables": list(schema_info["tables"].keys()), "foreign_keys": schema_info["foreign_keys"]}
+        "schema_info": {
+            "tables": list(schema_info["tables"].keys()), 
+            "foreign_keys": schema_info["foreign_keys"]
+        }
     }
     
     try:
@@ -39,9 +41,11 @@ async def generate_sql(request: GenerateRequest):
         if response.status_code == 200:
             return response.json()
         else:
-            return {"error": "AI service unavailable", "status_code": response.status_code}
+            return {"sql": "", "error": f"AI service error (status {response.status_code})"}
+    except requests.exceptions.ConnectionError:
+        return {"sql": "", "error": "AI service is starting up, please try again in a moment."}
     except Exception as e:
-        return {"error": "AI service unavailable"}
+        return {"sql": "", "error": f"AI service unavailable: {str(e)}"}
 
 @router.post("/validate")
 async def validate_sql(request: ValidateRequest):

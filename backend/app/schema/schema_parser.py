@@ -90,11 +90,13 @@ def detect_foreign_keys(schema):
 
 def build_schema_dictionary(schema):
     """Builds a unified schema dictionary."""
-    return {
+    schema_dict = {
         "tables": extract_columns(schema),
         "primary_keys": detect_primary_keys(schema),
         "foreign_keys": detect_foreign_keys(schema)
     }
+    schema_dict["schema_str"] = schema_to_text(schema_dict)
+    return schema_dict
 
 def schema_to_text(schema_dict):
     """Converts schema dict to compact one-line format."""
